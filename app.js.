@@ -1,0 +1,49 @@
+// app.js
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('stargazing-map');
+
+    // Initialize Stellarium Web
+    const stella = S.init(container, {
+        location: {
+            latitude: 0, // Set initial latitude
+            longitude: 0 // Set initial longitude
+        },
+        time: new Date(),
+        fov: 60 // Field of view
+    });
+
+    // Function to update location
+    function updateLocation(lat, lon) {
+        stella.setLocation(lat, lon);
+    }
+
+    // Get user's location if possible
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            updateLocation(lat, lon);
+        });
+    }
+
+    // Add event listener for search functionality
+    document.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            const query = prompt('Enter a celestial object or constellation:');
+            stella.search(query).then(results => {
+                if (results.length > 0) {
+                    stella.zoomTo(results[0]);
+                } else {
+                    alert('Object not found');
+                }
+            });
+        }
+    });
+
+    // Add time control
+    let currentTime = new Date();
+    setInterval(() => {
+        currentTime.setSeconds(currentTime.getSeconds() + 10);
+        stella.setTime(currentTime);
+    }, 10000);
+});
